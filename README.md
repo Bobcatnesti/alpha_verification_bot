@@ -1,4 +1,7 @@
-# Alpha Verification Bot
+> [!CAUTION]
+> I am not updating This README every time i code, so expect the information not up to date
+
+# Alpha Verification Bot (WIP, this progect are scaffold current with no code on almost all the file's)
 
 A Discord bot for automating student verification in the server. Users submit their Student Assessment Invoice, the bot reads it using OCR, admins review it, and verified students get full server access through a multi-step role progression.
 
