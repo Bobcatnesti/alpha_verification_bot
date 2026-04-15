@@ -23,29 +23,37 @@
 
 # data = response.json()
 
-import requests
-import json
-import sys
+import httpx
 import phonenumbers
-from phonenumbers import carrier, geocoder
 
-async def send_sms_message(mobile_no, message):
+async def send_sms_via_smpp(mobile_no: str, message: str) -> dict:
     parsed_no = phonenumbers.parse(mobile_no, "PH")
-    
-    if not phonenumbers.is_valid_number(parsed_no) and not phonenumbers.is_possible_number(parsed_no):
-        
-        sys.exit(1)
+
+    # Validate number
+    if not phonenumbers.is_valid_number(parsed_no) or not phonenumbers.is_possible_number(parsed_no):
+        raise ValueError("Invalid phone number")
+
+    # Convert to international format (E.164)
+    formatted_number = phonenumbers.format_number(
+        parsed_no, phonenumbers.PhoneNumberFormat.E164
+    )
 
     url = "https://smsapiph.onrender.com/api/v1/send/sms"
+
     headers = {
-        "x-api-key": "YOUR_API_KEY", # just need to add the api later and this should work
+        "x-api-key": "YOUR_API_KEY",
         "Content-Type": "application/json"
     }
+
     payload = {
-        "recipient": "parsed_no",
+        "recipient": formatted_number,
         "message": message
     }
 
-    response = requests.post(url, headers=headers, json=payload)
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, headers=headers, json=payload)
 
-    return response.json()
+        if response.status_code != 200:
+            raise Exception(f"SMS API error: {response.text}")
+
+        return response.json()
